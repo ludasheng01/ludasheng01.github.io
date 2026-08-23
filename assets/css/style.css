@@ -4,8 +4,8 @@
   --surface: #ffffff;
   --text: #1f2328;
   --muted: #6b7280;
-  --accent: #0f766e;
-  --accent-soft: #e3f2ef;
+  --accent: #c2410c;
+  --accent-soft: #ffedd5;
   --border: #e5e7eb;
   --code-bg: #f3f4f6;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -16,8 +16,8 @@
     --surface: #171a21;
     --text: #e6e8eb;
     --muted: #9aa0a6;
-    --accent: #5eead4;
-    --accent-soft: #14332e;
+    --accent: #fdba74;
+    --accent-soft: #3b2313;
     --border: #262a30;
     --code-bg: #1d2129;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
@@ -237,3 +237,4 @@ img { max-width: 100%; height: auto; }
 .post-comments { margin-top: 40px; }
 .post-comments h2 { font-size: 20px; margin: 0 0 14px; }
 .giscus { width: 100%; }
+

@@ -10,12 +10,12 @@
     "posts_per_page": 20
   },
   "comments": {
-    "enabled": false,
+    "enabled": true,
     "provider": "giscus",
-    "repo": "",
-    "repo_id": "",
+    "repo": "ludasheng01/blog",
+    "repo_id": "R_kgDOUBkB6w",
     "category": "Announcements",
-    "category_id": "",
+    "category_id": "DIC_kwDOUBkB684DEBCf",
     "mapping": "pathname",
     "lang": "zh-CN"
   }

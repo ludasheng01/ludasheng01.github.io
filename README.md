@@ -10,7 +10,7 @@ python build.py
 
 # 2. 本地预览
 python build.py --serve
-# 打开 http://127.0.0.1:8000/
+# 打开 http://127.0.0.1:8000/blog/
 ```
 
 ## 写一篇文章
@@ -30,7 +30,7 @@ draft: false
 这里是正文。
 ```
 
-3. 运行 `python build.py` 重新生成，刷新浏览器即可看到。
+3. 运行 `python build.py` 重新生成，然后 `git push` 自动部署。
 
 ## 自定义站点（改配置即可，不用改代码）
 
@@ -43,37 +43,39 @@ draft: false
 | `site.author` | 作者署名 |
 | `site.description` | 站点描述（用于 SEO） |
 | `site.url` | 部署后的网址 |
-| `site.base` | 部署到 GitHub Pages 项目站点（`用户名.github.io/仓库名`）时填 `"/仓库名"` |
+| `site.base` | GitHub Pages 项目站点的子路径（如 `/blog`） |
 
 修改后重新运行 `python build.py`。
 
-## 开启评论（Giscus，基于 GitHub Discussions，免费无广告）
+## 评论（Giscus，已配置好）
 
-1. 把博客推到 GitHub 仓库，并在仓库 Settings 里开启 **Discussions**。
-2. 安装 [giscus app](https://github.com/apps/giscus) 到该仓库。
-3. 到 [giscus.app](https://giscus.app) 按提示填写仓库名，生成 `data-repo-id` 和 `data-category-id`。
-4. 把结果填进 `config.json` 的 `comments` 段，并把 `enabled` 改为 `true`：
+评论已经接入 [Giscus](https://giscus.app)（基于 GitHub Discussions，免费无广告），`config.json` 里已填好仓库和分类 ID。
+
+**还差一步（一次性）：** 安装 giscus 应用到仓库 → 打开 [github.com/apps/giscus](https://github.com/apps/giscus)，点 **Install**，选择 `ludasheng01/blog` 即可。安装后文章页底部自动出现评论区。
+
+想换评论分类或仓库时，修改 `config.json` 的 `comments` 段：
 
 ```json
 "comments": {
   "enabled": true,
-  "repo": "你的用户名/仓库名",
-  "repo_id": "R_kgDO...",
+  "repo": "ludasheng01/blog",
+  "repo_id": "R_kgDOUBkB6w",
   "category": "Announcements",
-  "category_id": "DIC_kwDO...",
+  "category_id": "DIC_kwDOUBkB684DEBCf",
   "mapping": "pathname",
   "lang": "zh-CN"
 }
 ```
 
-5. 重新构建并部署，文章页底部就会出现评论区。
+## 绑定自定义域名（可选）
 
-## 部署到 GitHub Pages（自动）
+1. 在域名服务商处把域名解析到 GitHub Pages：添加 CNAME 记录 `你的域名` → `ludasheng01.github.io`。
+2. 到仓库 **Settings → Pages → Custom domain** 填上你的域名并保存（会自动生成 CNAME 文件）。
+3. 把 `config.json` 的 `site.url` 改成你的域名，重新部署。
 
-1. 在 GitHub 上新建仓库，把本目录推送上去（`main` 分支）。
-2. 进入仓库 **Settings → Pages**，把 Source 选为 **GitHub Actions**。
-3. 推送会自动触发 `.github/workflows/deploy.yml`，几分钟后即可访问 `https://你的用户名.github.io/仓库名/`。
-4. 上线后记得把 `config.json` 里的 `url` 改成真实网址；如果用自定义域名，在 Pages 设置里绑定即可。
+## 部署到 GitHub Pages（已完成）
+
+仓库已配置 **Settings → Pages → Source: GitHub Actions**，推送 `master` 分支即自动构建上线（`.github/workflows/deploy.yml`），线上地址：`https://ludasheng01.github.io/blog/`。
 
 ## 目录结构
 
