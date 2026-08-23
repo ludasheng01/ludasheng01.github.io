@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PAGE_TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="icon" href="{{BASE}}/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{BASE}}/assets/css/style.css">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="{{BASE}}/rss.xml">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="site-title" href="{{BASE}}/">
+      <img class="site-logo" src="{{BASE}}/assets/images/avatar.svg" alt="" width="28" height="28">
+      <span>{{SITE_TITLE}}</span>
+    </a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="{{BASE}}/" {{NAV_HOME}}>首页</a>
+      <a href="{{BASE}}/archive/" {{NAV_ARCHIVE}}>归档</a>
+      <a href="{{BASE}}/tags/" {{NAV_TAGS}}>标签</a>
+      <a href="{{BASE}}/about/" {{NAV_ABOUT}}>关于</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap main">
+{{PAGE_CONTENT}}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>© {{YEAR}} {{AUTHOR}} · <a href="{{BASE}}/rss.xml">RSS 订阅</a></p>
+  </div>
+</footer>
+</body>
+</html>

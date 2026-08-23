@@ -1,0 +1,22 @@
+{
+  "site": {
+    "title": "拾光小站",
+    "subtitle": "记录思考，分享成长",
+    "author": "拾光",
+    "description": "一个用 Markdown 写作的个人博客，记录学习、思考与生活。",
+    "url": "https://ludasheng01.github.io",
+    "base": "/blog",
+    "language": "zh-CN",
+    "posts_per_page": 20
+  },
+  "comments": {
+    "enabled": false,
+    "provider": "giscus",
+    "repo": "",
+    "repo_id": "",
+    "category": "Announcements",
+    "category_id": "",
+    "mapping": "pathname",
+    "lang": "zh-CN"
+  }
+}
