@@ -5,14 +5,14 @@
     "author": "拾光",
     "description": "一个用 Markdown 写作的个人博客，记录学习、思考与生活。",
     "url": "https://ludasheng01.github.io",
-    "base": "/blog",
+    "base": "",
     "language": "zh-CN",
     "posts_per_page": 20
   },
   "comments": {
     "enabled": true,
     "provider": "giscus",
-    "repo": "ludasheng01/blog",
+    "repo": "ludasheng01/ludasheng01.github.io",
     "repo_id": "R_kgDOUBkB6w",
     "category": "Announcements",
     "category_id": "DIC_kwDOUBkB684DEBCf",

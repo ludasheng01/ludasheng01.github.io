@@ -10,7 +10,7 @@ python build.py
 
 # 2. 本地预览
 python build.py --serve
-# 打开 http://127.0.0.1:8000/blog/
+# 打开 http://127.0.0.1:8000/
 ```
 
 ## 写一篇文章
@@ -43,7 +43,7 @@ draft: false
 | `site.author` | 作者署名 |
 | `site.description` | 站点描述（用于 SEO） |
 | `site.url` | 部署后的网址 |
-| `site.base` | GitHub Pages 项目站点的子路径（如 `/blog`） |
+| `site.base` | GitHub Pages 项目站点的子路径（根域名部署留空） |
 
 修改后重新运行 `python build.py`。
 
@@ -51,14 +51,14 @@ draft: false
 
 评论已经接入 [Giscus](https://giscus.app)（基于 GitHub Discussions，免费无广告），`config.json` 里已填好仓库和分类 ID。
 
-**还差一步（一次性）：** 安装 giscus 应用到仓库 → 打开 [github.com/apps/giscus](https://github.com/apps/giscus)，点 **Install**，选择 `ludasheng01/blog` 即可。安装后文章页底部自动出现评论区。
+**还差一步（一次性）：** 安装 giscus 应用到仓库 → 打开 [github.com/apps/giscus](https://github.com/apps/giscus)，点 **Install**，选择 `ludasheng01/ludasheng01.github.io` 即可。安装后文章页底部自动出现评论区。
 
 想换评论分类或仓库时，修改 `config.json` 的 `comments` 段：
 
 ```json
 "comments": {
   "enabled": true,
-  "repo": "ludasheng01/blog",
+  "repo": "ludasheng01/ludasheng01.github.io",
   "repo_id": "R_kgDOUBkB6w",
   "category": "Announcements",
   "category_id": "DIC_kwDOUBkB684DEBCf",
@@ -75,7 +75,7 @@ draft: false
 
 ## 部署到 GitHub Pages（已完成）
 
-仓库已配置 **Settings → Pages → Source: GitHub Actions**，推送 `master` 分支即自动构建上线（`.github/workflows/deploy.yml`），线上地址：`https://ludasheng01.github.io/blog/`。
+仓库已配置 **Settings → Pages → Source: GitHub Actions**，推送 `master` 分支即自动构建上线（`.github/workflows/deploy.yml`），线上地址：`https://ludasheng01.github.io/`。
 
 ## 目录结构
 
