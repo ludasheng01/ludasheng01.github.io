@@ -366,3 +366,32 @@ img { max-width: 100%; height: auto; }
   .post-cover, .post-cover img { width: 84px; }
   .post-cover img { height: 52px; }
 }
+
+
+/* ===== 分类 ===== */
+.cat {
+  display: inline-block;
+  padding: 1px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.cat:hover { text-decoration: none; filter: brightness(1.06); }
+
+.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.cat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  transition: transform .15s, border-color .15s;
+}
+.cat-card:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-2px); }
+.cat-name { font-size: 17px; font-weight: 500; }
+.cat-count { color: var(--muted); font-size: 13.5px; }

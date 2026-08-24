@@ -154,6 +154,7 @@ def read_post(path):
         "reading_minutes": minutes,
         "word_count": words,
         "cover": meta.get("cover", ""),
+        "category": meta.get("category", ""),
         "title": meta.get("title", Path(path).stem),
         "date": date,
         "tags": meta.get("tags", []),
@@ -278,6 +279,10 @@ def build():
             f'<a class="tag" href="{url("tags/" + slugify(tag) + "/")}">#{tag}</a>'
             for tag in post["tags"]
         )
+        category_html = (
+            f'<a class="cat" href="{url("categories/" + slugify(post["category"]) + "/")}">{html.escape(post["category"])}</a>'
+            if post.get("category") else ""
+        )
         summary = post["summary"] or strip_html(post["content_html"])[:140]
         cover = cover_url(post.get("cover", ""), base)
         cover_html = (
@@ -288,7 +293,7 @@ def build():
             f'<article class="post-item">'
             f'<div class="post-item-main">'
             f'<h2 class="post-item-title"><a href="{url("posts/" + post["slug"] + "/")}">{html.escape(post["title"])}</a></h2>'
-            f'<div class="post-meta"><time datetime="{post["date"].isoformat()}">{format_date(post["date"])}</time> {tags_html}</div>'
+            f'<div class="post-meta"><time datetime="{post["date"].isoformat()}">{format_date(post["date"])}</time> {category_html} {tags_html}</div>'
             f'<p class="post-item-summary">{html.escape(summary)}</p>'
             f'</div>'
             f'{cover_html}'
@@ -344,6 +349,10 @@ def build():
             f'<img class="post-cover-banner" src="{cover}" alt="{html.escape(post["title"])}">'
             if cover else ""
         )
+        category_html = (
+            f'<a class="cat" href="{url("categories/" + slugify(post["category"]) + "/")}">{html.escape(post["category"])}</a>'
+            if post.get("category") else ""
+        )
         if cover:
             og_image = cover if cover.startswith("http") else SITE["url"] + cover
         else:
@@ -359,6 +368,7 @@ def build():
             DATE=format_date(post["date"]),
             DATE_ISO=post["date"].isoformat(),
             TAGS=tags_html,
+            CATEGORY=category_html,
             READING_TIME=f'<span>约 {post["reading_minutes"]} 分钟 · {post["word_count"]} 字</span>',
             PAGE_VIEWS=page_views,
             CONTENT=post["content_html"],
@@ -400,6 +410,35 @@ def build():
         out.mkdir(parents=True, exist_ok=True)
         (out / "index.html").write_text(
             wrap_layout(content, f"标签：{tag}", SITE["description"], "tags", path=f"/tags/{tag_slug}/"),
+            encoding="utf-8",
+        )
+
+    # ---------- 分类 ----------
+    cat_posts = {}
+    for post in posts:
+        if post["category"]:
+            cat_posts.setdefault(post["category"], []).append(post)
+    cat_list = "".join(
+        f'<a class="cat-card" href="{url("categories/" + slugify(cat) + "/")}">'
+        f'<span class="cat-name">{html.escape(cat)}</span>'
+        f'<span class="cat-count">{len(items)} 篇</span></a>'
+        for cat, items in sorted(cat_posts.items(), key=lambda kv: -len(kv[1]))
+    )
+    cats_index = render_template("categories.html", CAT_LIST=cat_list)
+    write_page("categories", cats_index, "分类", SITE["description"])
+
+    for cat, items in cat_posts.items():
+        cat_slug = slugify(cat)
+        cat_items = "\n".join(
+            f'<li class="archive-item"><span class="archive-date">{format_date(p["date"], "%Y-%m-%d")}</span> '
+            f'<a href="{url("posts/" + p["slug"] + "/")}">{html.escape(p["title"])}</a></li>'
+            for p in items
+        )
+        content = render_template("category.html", CATEGORY=html.escape(cat), POSTS=cat_items)
+        out = PUBLIC_DIR / "categories" / cat_slug
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "index.html").write_text(
+            wrap_layout(content, f"分类：{cat}", SITE["description"], "categories", path=f"/categories/{cat_slug}/"),
             encoding="utf-8",
         )
 
@@ -453,7 +492,7 @@ def build():
         encoding="utf-8",
     )
     write_rss(posts, base)
-    write_sitemap(posts, list(tag_posts), base)
+    write_sitemap(posts, list(tag_posts), list(cat_posts), base)
 
     print(f"[OK] 构建完成：{len(posts)} 篇文章 -> {PUBLIC_DIR}")
 
@@ -494,6 +533,7 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
         NAV_ARCHIVE='class="active"' if active == "archive" else "",
         NAV_TAGS='class="active"' if active == "tags" else "",
         NAV_ABOUT='class="active"' if active == "about" else "",
+        NAV_CATEGORIES='class="active"' if active == "categories" else "",
         BUSUANZI_SITE=busuanzi_site,
         BUSUANZI_SCRIPT=busuanzi_script,
         PAGE_CONTENT=content,
@@ -524,7 +564,8 @@ def write_rss(posts, base):
             f"<guid>{SITE['url']}{base}/posts/{post['slug']}/</guid>"
             f"<pubDate>{post['date'].strftime('%a, %d %b %Y %H:%M:%S +0800')}</pubDate>"
             f"<description>{html.escape(strip_html(post['content_html'])[:500])}</description>"
-            f"<content:encoded><![CDATA[{full}]]></content:encoded>"
+            + (f"<category>{html.escape(post['category'])}</category>" if post.get("category") else "")
+            + f"<content:encoded><![CDATA[{full}]]></content:encoded>"
             f"{enclosure}"
             "</item>"
         )
@@ -543,10 +584,11 @@ def write_rss(posts, base):
     (PUBLIC_DIR / "rss.xml").write_text(rss, encoding="utf-8")
 
 
-def write_sitemap(posts, tags, base):
-    urls = [f"{SITE['url']}{base}/", f"{SITE['url']}{base}/archive/", f"{SITE['url']}{base}/tags/"]
+def write_sitemap(posts, tags, cats, base):
+    urls = [f"{SITE['url']}{base}/", f"{SITE['url']}{base}/archive/", f"{SITE['url']}{base}/tags/", f"{SITE['url']}{base}/categories/"]
     urls += [f"{SITE['url']}{base}/posts/{p['slug']}/" for p in posts]
     urls += [f"{SITE['url']}{base}/tags/{t}/" for t in tags]
+    urls += [f"{SITE['url']}{base}/categories/{slugify(c)}/" for c in cats]
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "".join(f"<url><loc>{u}</loc></url>\n" for u in urls)
     xml += "</urlset>\n"
