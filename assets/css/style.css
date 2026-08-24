@@ -122,7 +122,7 @@ img { max-width: 100%; height: auto; }
 
 /* ===== 主体 ===== */
 .main {
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
