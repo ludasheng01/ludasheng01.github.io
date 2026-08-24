@@ -18,5 +18,10 @@
     "category_id": "DIC_kwDOUBkB684DEBCf",
     "mapping": "pathname",
     "lang": "zh-CN"
+  },
+  "feedback": {
+    "enabled": true,
+    "provider": "kvdb",
+    "bucket": "TEWHxSCzRypQn5phfFftKH"
   }
 }

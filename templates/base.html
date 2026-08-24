@@ -90,8 +90,75 @@
   });
 })();
 </script>
+
+<script>
+(function () {
+  var sections = document.querySelectorAll(".post-feedback");
+  if (!sections.length) return;
+  var KVDB = "https://kvdb.io/";
+  function getCount(bucket, key) {
+    return fetch(KVDB + bucket + "/" + key)
+      .then(function (r) { return r.status === 200 ? r.text().then(function (t) { return parseInt(t, 10) || 0; }) : 0; })
+      .catch(function () { return null; });
+  }
+  function putCount(bucket, key, value) {
+    return fetch(KVDB + bucket + "/" + key, { method: "PUT", body: String(value) })
+      .then(function () { return true; })
+      .catch(function () { return false; });
+  }
+  sections.forEach(function (sec) {
+    var bucket = sec.getAttribute("data-bucket");
+    var slug = sec.getAttribute("data-post");
+    var counts = { helpful: null, unhelpful: null };
+    var statusEl = sec.querySelector(".feedback-status");
+    var lsKey = "fb:" + slug;
+    var voted = localStorage.getItem(lsKey);
+
+    function refreshUI() {
+      sec.querySelectorAll("[data-count]").forEach(function (el) {
+        var k = el.getAttribute("data-count");
+        if (counts[k] === null) { el.textContent = "–"; }
+        else { el.textContent = counts[k]; }
+      });
+      sec.querySelectorAll("[data-vote]").forEach(function (btn) {
+        var on = btn.getAttribute("data-vote") === voted;
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.classList.toggle("active", on);
+      });
+    }
+    function setStatus(msg) {
+      if (statusEl) { statusEl.textContent = msg; }
+    }
+
+    Promise.all([
+      getCount(bucket, slug + "-helpful").then(function (v) { counts.helpful = v; }),
+      getCount(bucket, slug + "-unhelpful").then(function (v) { counts.unhelpful = v; })
+    ]).then(refreshUI).catch(refreshUI);
+
+    sec.querySelectorAll("[data-vote]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var vote = btn.getAttribute("data-vote");
+        var other = vote === "helpful" ? "unhelpful" : "helpful";
+        if (voted === vote) { setStatus("你已经评价过这篇文章啦，感谢反馈！"); return; }
+        var wasVoted = voted;
+        if (counts[vote] === null) counts[vote] = 0;
+        if (counts[other] === null) counts[other] = 0;
+        counts[vote] += 1;
+        if (wasVoted) { counts[wasVoted] = Math.max(0, counts[wasVoted] - 1); }
+        voted = vote;
+        localStorage.setItem(lsKey, voted);
+        putCount(bucket, slug + "-helpful", counts.helpful);
+        putCount(bucket, slug + "-unhelpful", counts.unhelpful);
+        refreshUI();
+        setStatus(vote === "helpful" ? "感谢反馈！很高兴能帮到你 ☀️" : "收到反馈，我会继续改进 🙏");
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
+
 
 
 

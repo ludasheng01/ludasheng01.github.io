@@ -40,6 +40,11 @@ DEFAULTS = {
     "analytics": {
         "busuanzi": True,
     },
+    "feedback": {
+        "enabled": False,
+        "provider": "kvdb",
+        "bucket": "",
+    },
     "comments": {
         "enabled": False,
         "provider": "giscus",
@@ -58,7 +63,7 @@ def load_config():
     cfg = json.loads(json.dumps(DEFAULTS))
     if cfg_path.exists():
         user_cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-        for section in ("site", "analytics", "comments"):
+        for section in ("site", "analytics", "comments", "feedback"):
             if section in user_cfg and isinstance(user_cfg[section], dict):
                 cfg[section].update(user_cfg[section])
     return cfg
@@ -67,6 +72,7 @@ def load_config():
 CONFIG = load_config()
 SITE = CONFIG["site"]
 ANALYTICS = CONFIG["analytics"]
+FEEDBACK = CONFIG["feedback"]
 COMMENTS = CONFIG["comments"]
 
 MD_EXTENSIONS = ["fenced_code", "tables", "toc", "attr_list", "sane_lists", "def_list", "codehilite"]
@@ -214,6 +220,21 @@ def cover_url(cover, base):
 
 def format_date(dt, fmt="%Y 年 %m 月 %d 日"):
     return dt.strftime(fmt)
+
+
+def feedback_html(slug):
+    """文章底部'有帮助/没帮助'点评区。"""
+    if not FEEDBACK.get("enabled") or not FEEDBACK.get("bucket"):
+        return ""
+    return f'''
+<section class="post-feedback" data-post="{html.escape(slug)}" data-bucket="{html.escape(FEEDBACK["bucket"])}">
+  <p class="feedback-title">这篇文章对你有帮助吗？</p>
+  <div class="feedback-buttons">
+    <button type="button" data-vote="helpful" aria-pressed="false">有帮助 <span class="fb-count" data-count="helpful">–</span></button>
+    <button type="button" data-vote="unhelpful" aria-pressed="false">没帮助 <span class="fb-count" data-count="unhelpful">–</span></button>
+  </div>
+  <p class="feedback-status" role="status" aria-live="polite"></p>
+</section>'''
 
 
 def giscus_html():
@@ -417,6 +438,7 @@ def build():
             TOC=post["toc"],
             COMMENTS=giscus_html(),
             RELATED=related_html,
+            FEEDBACK=feedback_html(post["slug"]),
             PREV=prev_html,
             NEXT=next_html,
         )

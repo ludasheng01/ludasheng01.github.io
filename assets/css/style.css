@@ -481,3 +481,43 @@ img { max-width: 100%; height: auto; }
 }
 .post-body pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
 .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+
+/* ===== 文章点评 ===== */
+.post-feedback {
+  margin-top: 36px;
+  padding: 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  text-align: center;
+}
+.feedback-title { margin: 0 0 14px; font-size: 16px; font-weight: 500; }
+.feedback-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.feedback-buttons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 22px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.feedback-buttons button:hover { border-color: var(--accent); color: var(--accent); }
+.feedback-buttons button[data-vote="helpful"].active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.feedback-buttons button[data-vote="unhelpful"].active {
+  background: var(--muted);
+  border-color: var(--muted);
+  color: var(--on-accent);
+}
+.fb-count { font-variant-numeric: tabular-nums; }
+.feedback-status { margin: 12px 0 0; min-height: 1.4em; color: var(--muted); font-size: 14px; }
