@@ -2,6 +2,7 @@
 title: 欢迎来到我的博客
 date: 2026-08-23
 tags: [随笔, 开始, 博客]
+cover: /assets/images/covers/cover-welcome.svg
 summary: 我的个人博客正式上线啦！这篇文章介绍一下博客的定位，以及我会在这里写些什么。
 ---
 
@@ -43,4 +44,5 @@ print(hello("读者"))
 | 预览 | 运行 `python build.py --serve` |
 
 今天就到这里，期待与你常常见面。
+
 

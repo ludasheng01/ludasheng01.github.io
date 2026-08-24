@@ -93,7 +93,13 @@ img { max-width: 100%; height: auto; }
 .post-item {
   padding: 22px 0;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
 }
+.post-item-main { flex: 1; min-width: 0; }
+.post-cover { flex: none; width: 128px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.post-cover img { display: block; width: 128px; height: 72px; object-fit: cover; }
 .post-item:first-child { padding-top: 6px; }
 .post-item-title { font-size: 21px; margin: 0 0 8px; line-height: 1.4; }
 .post-item-title a { color: var(--text); }
@@ -338,3 +344,25 @@ img { max-width: 100%; height: auto; }
 /* ===== 404 ===== */
 .notfound { text-align: center; padding: 60px 0; }
 .notfound-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+
+
+/* ===== 文章封面横幅 ===== */
+.post-cover-banner {
+  display: block;
+  width: 100%;
+  max-height: 340px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 22px;
+}
+
+/* ===== 阅读量 / 站点统计 ===== */
+.post-views { color: var(--muted); }
+.site-stats { margin-left: 8px; }
+
+/* ===== 响应式：小屏缩略图缩小 ===== */
+@media (max-width: 560px) {
+  .post-cover, .post-cover img { width: 84px; }
+  .post-cover img { height: 52px; }
+}

@@ -37,6 +37,9 @@ DEFAULTS = {
         "language": "zh-CN",
         "posts_per_page": 20,
     },
+    "analytics": {
+        "busuanzi": True,
+    },
     "comments": {
         "enabled": False,
         "provider": "giscus",
@@ -55,7 +58,7 @@ def load_config():
     cfg = json.loads(json.dumps(DEFAULTS))
     if cfg_path.exists():
         user_cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-        for section in ("site", "comments"):
+        for section in ("site", "analytics", "comments"):
             if section in user_cfg and isinstance(user_cfg[section], dict):
                 cfg[section].update(user_cfg[section])
     return cfg
@@ -63,6 +66,7 @@ def load_config():
 
 CONFIG = load_config()
 SITE = CONFIG["site"]
+ANALYTICS = CONFIG["analytics"]
 COMMENTS = CONFIG["comments"]
 
 MD_EXTENSIONS = ["fenced_code", "tables", "toc", "attr_list", "sane_lists", "def_list", "codehilite"]
@@ -149,6 +153,7 @@ def read_post(path):
         "slug": slugify(path.name),
         "reading_minutes": minutes,
         "word_count": words,
+        "cover": meta.get("cover", ""),
         "title": meta.get("title", Path(path).stem),
         "date": date,
         "tags": meta.get("tags", []),
@@ -190,6 +195,15 @@ def render_template(name, **kwargs):
     for key, value in kwargs.items():
         text = text.replace("{{" + key + "}}", str(value))
     return text
+
+
+def cover_url(cover, base):
+    """把 frontmatter 里的 cover 转成可用 URL（支持绝对路径/相对路径/外链）。"""
+    if not cover:
+        return ""
+    if cover.startswith(("http://", "https://", "//")):
+        return cover
+    return base + "/" + cover.lstrip("/")
 
 
 def format_date(dt, fmt="%Y 年 %m 月 %d 日"):
@@ -265,11 +279,19 @@ def build():
             for tag in post["tags"]
         )
         summary = post["summary"] or strip_html(post["content_html"])[:140]
+        cover = cover_url(post.get("cover", ""), base)
+        cover_html = (
+            f'<a class="post-cover" href="{url("posts/" + post["slug"] + "/")}"><img src="{cover}" alt="" loading="lazy"></a>'
+            if cover else ""
+        )
         return (
             f'<article class="post-item">'
+            f'<div class="post-item-main">'
             f'<h2 class="post-item-title"><a href="{url("posts/" + post["slug"] + "/")}">{html.escape(post["title"])}</a></h2>'
             f'<div class="post-meta"><time datetime="{post["date"].isoformat()}">{format_date(post["date"])}</time> {tags_html}</div>'
             f'<p class="post-item-summary">{html.escape(summary)}</p>'
+            f'</div>'
+            f'{cover_html}'
             f"</article>"
         )
 
@@ -317,13 +339,28 @@ def build():
                 )
                 + "</ul></section>"
             )
+        cover = cover_url(post.get("cover", ""), base)
+        cover_html = (
+            f'<img class="post-cover-banner" src="{cover}" alt="{html.escape(post["title"])}">'
+            if cover else ""
+        )
+        if cover:
+            og_image = cover if cover.startswith("http") else SITE["url"] + cover
+        else:
+            og_image = ""
+        page_views = (
+            '<span class="post-views">阅读 <span id="busuanzi_value_page_pv"></span></span>'
+            if ANALYTICS.get("busuanzi") else ""
+        )
         content = render_template(
             "post.html",
             TITLE=html.escape(post["title"]),
+            COVER=cover_html,
             DATE=format_date(post["date"]),
             DATE_ISO=post["date"].isoformat(),
             TAGS=tags_html,
             READING_TIME=f'<span>约 {post["reading_minutes"]} 分钟 · {post["word_count"]} 字</span>',
+            PAGE_VIEWS=page_views,
             CONTENT=post["content_html"],
             TOC=post["toc"],
             COMMENTS=giscus_html(),
@@ -335,7 +372,7 @@ def build():
         out.mkdir(parents=True, exist_ok=True)
         (out / "index.html").write_text(
             wrap_layout(content, html.escape(post["title"]), SITE["description"], "posts",
-                        path=f"/posts/{post['slug']}/", og_type="article"),
+                        path=f"/posts/{post['slug']}/", og_type="article", og_image=og_image),
             encoding="utf-8",
         )
 
@@ -426,11 +463,21 @@ def strip_html(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def wrap_layout(content, page_title, description, active, path="/", og_type="website"):
+def wrap_layout(content, page_title, description, active, path="/", og_type="website", og_image=""):
     full_title = page_title if page_title == SITE["title"] else f"{page_title} · {SITE['title']}"
     base = SITE["base"].rstrip("/")
     page_url = SITE["url"] + base + path
-    og_image = SITE["url"] + base + "/assets/images/avatar.svg"
+    if not og_image:
+        og_image = SITE["url"] + base + "/assets/images/avatar.svg"
+    busuanzi_on = ANALYTICS.get("busuanzi", False)
+    busuanzi_site = (
+        '<span class="site-stats">本站总访问 <span id="busuanzi_value_site_pv"></span> 次 · 访客 <span id="busuanzi_value_site_uv"></span> 人</span>'
+        if busuanzi_on else ""
+    )
+    busuanzi_script = (
+        '<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>'
+        if busuanzi_on else ""
+    )
     return render_template(
         "base.html",
         PAGE_TITLE=full_title,
@@ -447,6 +494,8 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
         NAV_ARCHIVE='class="active"' if active == "archive" else "",
         NAV_TAGS='class="active"' if active == "tags" else "",
         NAV_ABOUT='class="active"' if active == "about" else "",
+        BUSUANZI_SITE=busuanzi_site,
+        BUSUANZI_SCRIPT=busuanzi_script,
         PAGE_CONTENT=content,
     )
 
@@ -463,6 +512,11 @@ def write_page(slug, content, title, description):
 def write_rss(posts, base):
     items = []
     for post in posts[:10]:
+        full = post["content_html"].replace("]]>", "]]]]><![CDATA[>")
+        cover = cover_url(post.get("cover", ""), base)
+        enclosure = ""
+        if cover:
+            enclosure = f'<enclosure url="{html.escape(SITE["url"] + cover)}" type="image/svg+xml"/>'
         items.append(
             "<item>"
             f"<title>{html.escape(post['title'])}</title>"
@@ -470,11 +524,14 @@ def write_rss(posts, base):
             f"<guid>{SITE['url']}{base}/posts/{post['slug']}/</guid>"
             f"<pubDate>{post['date'].strftime('%a, %d %b %Y %H:%M:%S +0800')}</pubDate>"
             f"<description>{html.escape(strip_html(post['content_html'])[:500])}</description>"
+            f"<content:encoded><![CDATA[{full}]]></content:encoded>"
+            f"{enclosure}"
             "</item>"
         )
     rss = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n'
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" '
+        'xmlns:content="http://purl.org/rss/1.0/modules/content/">\n'
         "<channel>\n"
         f"<title>{html.escape(SITE['title'])}</title>\n"
         f"<link>{SITE['url']}{base}/</link>\n"

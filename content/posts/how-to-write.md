@@ -2,6 +2,7 @@
 title: 如何用 Markdown 写文章
 date: 2026-08-24
 tags: [教程, Markdown, 博客]
+cover: /assets/images/covers/cover-how-to-write.svg
 summary: 这个博客的写作方式很简单：新建一个 Markdown 文件，填上标题和标签，构建一下就能发布。
 ---
 
@@ -47,4 +48,5 @@ python build.py --serve
 - 正文里写 `[TOC]` 可以自动生成文章目录
 
 一切从第一篇开始。
+
 
