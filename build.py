@@ -36,6 +36,7 @@ DEFAULTS = {
         "base": "",
         "language": "zh-CN",
         "posts_per_page": 20,
+        "background": "",
     },
     "analytics": {
         "busuanzi": True,
@@ -574,6 +575,10 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
     page_url = SITE["url"] + base + path
     if not og_image:
         og_image = SITE["url"] + base + "/assets/images/avatar.svg"
+    bg = SITE.get("background", "")
+    background_style = ""
+    if bg:
+        background_style = f"<style>:root{{--bg-img:url('{bg}')}}</style>"
     busuanzi_on = ANALYTICS.get("busuanzi", False)
     busuanzi_site = (
         '<span class="site-stats">本站总访问 <span id="busuanzi_value_site_pv"></span> 次 · 访客 <span id="busuanzi_value_site_uv"></span> 人</span>'
@@ -600,6 +605,7 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
         NAV_TAGS='class="active"' if active == "tags" else "",
         NAV_ABOUT='class="active"' if active == "about" else "",
         NAV_CATEGORIES='class="active"' if active == "categories" else "",
+        BACKGROUND_STYLE=background_style,
         BUSUANZI_SITE=busuanzi_site,
         BUSUANZI_SCRIPT=busuanzi_script,
         PAGE_CONTENT=content,
