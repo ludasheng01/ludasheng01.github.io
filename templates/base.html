@@ -59,7 +59,39 @@
 })();
 </script>
 {{BUSUANZI_SCRIPT}}
+
+<script>
+(function () {
+  document.querySelectorAll(".post-body pre").forEach(function (pre) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "复制";
+    btn.setAttribute("aria-label", "复制代码");
+    pre.appendChild(btn);
+    btn.addEventListener("click", function () {
+      var code = pre.querySelector("code");
+      var text = code ? code.innerText : pre.innerText;
+      function done() { btn.textContent = "已复制 ✓"; setTimeout(function () { btn.textContent = "复制"; }, 1500); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(function () { fallback(); done(); });
+      } else { fallback(); done(); }
+    });
+  });
+})();
+</script>
 </body>
 </html>
+
 
 

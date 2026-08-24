@@ -1,6 +1,7 @@
 ---
 title: 发表文章与插入图片的完整示例
 date: 2026-08-24
+updated: 2026-08-24
 category: 教程
 tags: [教程, 博客, Markdown]
 cover: /assets/images/covers/cover-demo.svg
@@ -77,3 +78,4 @@ def hello():
 - **封面图**：frontmatter 里的 `cover:` 字段
 
 快去试试写你的第一篇正式文章吧！
+

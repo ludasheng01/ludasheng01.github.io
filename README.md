@@ -10,7 +10,8 @@
 - **阅读时间与字数统计**：每篇文章自动显示
 - **相关文章推荐**：按标签重合自动推荐
 - **SEO 优化**：Open Graph、canonical、sitemap
-- **自定义 404 页面**
+- **自定义 404 页面**、**robots.txt**
+- **分页**（文章多时自动翻页）、**文章置顶**（`sticky: true`）、**更新日期**（`updated:`）、**代码一键复制**
 - **回到顶部按钮**、深色模式、手机响应式
 - **Giscus 评论**（已配置）
 - **访问统计**（不蒜子：站点总访问 / 访客数 / 文章阅读量，可在 `config.json` 关闭）
@@ -38,6 +39,8 @@ python build.py --serve
 title: 我的第一篇文章
 date: 2026-08-24
 category: 教程                        # 分类（每篇一个，可选）
+sticky: true                          # 可选：置顶文章
+updated: 2026-08-25                   # 可选：更新日期，会显示"更新于"
 tags: [教程, 随笔]
 cover: /assets/images/covers/xxx.svg   # 可选：文章封面图
 summary: 一句话摘要，会显示在首页。

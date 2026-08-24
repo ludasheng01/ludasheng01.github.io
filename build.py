@@ -122,6 +122,8 @@ def parse_frontmatter(text):
             meta[key] = [t.strip() for t in re.split(r"[，,]", value) if t.strip()]
         elif key == "draft":
             meta[key] = value.lower() in ("true", "yes", "1")
+        elif key == "sticky":
+            meta[key] = value.lower() in ("true", "yes", "1")
         else:
             meta[key] = value
     return meta, body
@@ -159,6 +161,8 @@ def read_post(path):
         "date": date,
         "tags": meta.get("tags", []),
         "draft": bool(meta.get("draft", False)),
+        "sticky": bool(meta.get("sticky", False)),
+        "updated": parse_date(meta["updated"]) if meta.get("updated") else None,
         "summary": meta.get("summary", ""),
         "content_html": content_html,
         "toc": toc,
@@ -175,6 +179,7 @@ def load_posts(include_drafts=False):
                 continue
             posts.append(post)
     posts.sort(key=lambda p: p["date"], reverse=True)
+    posts.sort(key=lambda p: not p["sticky"])
     return posts
 
 
@@ -250,6 +255,20 @@ def write_highlight_css():
         pass
 
 
+def pagination_html(current, total, base):
+    if total <= 1:
+        return ""
+    def page_url(n):
+        return base + "/" if n == 1 else f"{base}/page/{n}/"
+    prev = f'<a class="page-btn" href="{page_url(current - 1)}">← 上一页</a>' if current > 1 else '<span class="page-btn disabled">← 上一页</span>'
+    next_ = f'<a class="page-btn" href="{page_url(current + 1)}">下一页 →</a>' if current < total else '<span class="page-btn disabled">下一页 →</span>'
+    nums = "".join(
+        (f'<span class="page-num current">{n}</span>' if n == current else f'<a class="page-num" href="{page_url(n)}">{n}</a>')
+        for n in range(1, total + 1)
+    )
+    return f'<nav class="pagination" aria-label="分页">{prev}<span class="page-nums">{nums}</span>{next_}</nav>'
+
+
 def build():
     if PUBLIC_DIR.exists():
         shutil.rmtree(PUBLIC_DIR)
@@ -293,20 +312,38 @@ def build():
             f'<article class="post-item">'
             f'<div class="post-item-main">'
             f'<h2 class="post-item-title"><a href="{url("posts/" + post["slug"] + "/")}">{html.escape(post["title"])}</a></h2>'
-            f'<div class="post-meta"><time datetime="{post["date"].isoformat()}">{format_date(post["date"])}</time> {category_html} {tags_html}</div>'
+            f'<div class="post-meta">' + (f'<span class="sticky-badge">置顶</span>' if post.get("sticky") else "") + f'<time datetime="{post["date"].isoformat()}">{format_date(post["date"])}</time> {category_html} {tags_html}</div>'
             f'<p class="post-item-summary">{html.escape(summary)}</p>'
             f'</div>'
             f'{cover_html}'
             f"</article>"
         )
 
-    index_items = "\n".join(post_item(p) for p in posts[: SITE["posts_per_page"]])
-    index_content = render_template(
-        "index.html",
-        SUBTITLE=SITE["subtitle"],
-        POSTS=index_items,
-        POST_COUNT=len(posts),
-    )
+    per_page = SITE.get("posts_per_page", 20)
+    post_pages = [posts[i : i + per_page] for i in range(0, len(posts), per_page)] or [posts]
+    total_pages = len(post_pages)
+    for page_idx, page_posts in enumerate(post_pages, start=1):
+        index_items = "\n".join(post_item(p) for p in page_posts)
+        pager = pagination_html(page_idx, total_pages, base)
+        index_content = render_template(
+            "index.html",
+            SUBTITLE=SITE["subtitle"],
+            POSTS=index_items,
+            POST_COUNT=len(posts),
+            PAGER=pager,
+        )
+        if page_idx == 1:
+            (PUBLIC_DIR / "index.html").write_text(
+                wrap_layout(index_content, SITE["title"], SITE["description"], "home", path="/"),
+                encoding="utf-8",
+            )
+        else:
+            out = PUBLIC_DIR / "page" / str(page_idx)
+            out.mkdir(parents=True, exist_ok=True)
+            (out / "index.html").write_text(
+                wrap_layout(index_content, f"第 {page_idx} 页", SITE["description"], "home", path=f"/page/{page_idx}/"),
+                encoding="utf-8",
+            )
 
     # ---------- 文章页 ----------
     for post in posts:
@@ -361,10 +398,15 @@ def build():
             '<span class="post-views">阅读 <span id="busuanzi_value_page_pv"></span></span>'
             if ANALYTICS.get("busuanzi") else ""
         )
+        updated_html = (
+            f'<span class="post-updated">更新于 {format_date(post["updated"])}</span>'
+            if post.get("updated") else ""
+        )
         content = render_template(
             "post.html",
             TITLE=html.escape(post["title"]),
             COVER=cover_html,
+            UPDATED=updated_html,
             DATE=format_date(post["date"]),
             DATE_ISO=post["date"].isoformat(),
             TAGS=tags_html,
@@ -486,13 +528,15 @@ def build():
         encoding="utf-8",
     )
 
-    # ---------- 首页 & RSS & sitemap ----------
-    (PUBLIC_DIR / "index.html").write_text(
-        wrap_layout(index_content, SITE["title"], SITE["description"], "home", path="/"),
-        encoding="utf-8",
-    )
+    # ---------- RSS & sitemap & robots ----------
     write_rss(posts, base)
-    write_sitemap(posts, list(tag_posts), list(cat_posts), base)
+    write_sitemap(posts, list(tag_posts), list(cat_posts), base, total_pages)
+    robots = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        f"Sitemap: {SITE['url']}{base}/sitemap.xml\n"
+    )
+    (PUBLIC_DIR / "robots.txt").write_text(robots, encoding="utf-8")
 
     print(f"[OK] 构建完成：{len(posts)} 篇文章 -> {PUBLIC_DIR}")
 
@@ -584,11 +628,12 @@ def write_rss(posts, base):
     (PUBLIC_DIR / "rss.xml").write_text(rss, encoding="utf-8")
 
 
-def write_sitemap(posts, tags, cats, base):
+def write_sitemap(posts, tags, cats, base, total_pages=1):
     urls = [f"{SITE['url']}{base}/", f"{SITE['url']}{base}/archive/", f"{SITE['url']}{base}/tags/", f"{SITE['url']}{base}/categories/"]
     urls += [f"{SITE['url']}{base}/posts/{p['slug']}/" for p in posts]
     urls += [f"{SITE['url']}{base}/tags/{t}/" for t in tags]
     urls += [f"{SITE['url']}{base}/categories/{slugify(c)}/" for c in cats]
+    urls += [f"{SITE['url']}{base}/page/{n}/" for n in range(2, total_pages + 1)]
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "".join(f"<url><loc>{u}</loc></url>\n" for u in urls)
     xml += "</urlset>\n"

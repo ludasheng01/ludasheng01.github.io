@@ -150,7 +150,7 @@ img { max-width: 100%; height: auto; }
   padding: 2px 6px;
   border-radius: 6px;
 }
-.post-body pre { line-height: 1.6; overflow-x: auto; }
+.post-body pre { line-height: 1.6; overflow-x: auto; position: relative; }
 .post-body pre code { background: none; padding: 0; font-size: 14px; }
 .post-body .highlight {
   background: var(--code-bg);
@@ -395,3 +395,71 @@ img { max-width: 100%; height: auto; }
 .cat-card:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-2px); }
 .cat-name { font-size: 17px; font-weight: 500; }
 .cat-count { color: var(--muted); font-size: 13.5px; }
+
+
+/* ===== 置顶徽章 ===== */
+.sticky-badge {
+  display: inline-block;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* ===== 更新日期 ===== */
+.post-updated { color: var(--muted); }
+
+/* ===== 分页 ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+.page-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+  background: var(--surface);
+}
+.page-btn:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
+.page-btn.disabled { opacity: 0.45; pointer-events: none; }
+.page-nums { display: flex; gap: 6px; }
+.page-num {
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  background: var(--surface);
+}
+.page-num:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
+.page-num.current { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+/* ===== 代码复制按钮 ===== */
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.post-body pre:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
