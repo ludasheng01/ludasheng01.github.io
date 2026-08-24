@@ -102,7 +102,15 @@ img { max-width: 100%; height: auto; }
 .site-nav a.active { color: var(--accent); background: var(--accent-soft); font-weight: 500; }
 
 /* ===== 主体 ===== */
-.main { padding: 40px 20px 60px; }
+.main {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--card-shadow);
+  padding: 36px 34px 56px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
 .hero { margin-bottom: 36px; }
 .hero h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: 0.5px; }
 .hero-meta { color: var(--muted); margin: 0; font-size: 15px; }
@@ -232,10 +240,17 @@ img { max-width: 100%; height: auto; }
 
 /* ===== 页脚 ===== */
 .site-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 0 32px;
+  border-top: none;
+  padding: 0 20px 28px;
   color: var(--muted);
   font-size: 13.5px;
+}
+.site-footer .wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 16px 22px;
 }
 .site-footer p { margin: 0; }
 .site-footer a { color: var(--muted); }
@@ -243,6 +258,8 @@ img { max-width: 100%; height: auto; }
 /* ===== 响应式 ===== */
 @media (max-width: 560px) {
   .header-inner { height: auto; padding: 10px 0; }
+  .main { padding: 24px 18px 40px; border-radius: 14px; }
+  .site-footer { padding: 0 12px 20px; }
   .hero h1 { font-size: 25px; }
   .post-head h1 { font-size: 25px; }
   .post-body { font-size: 16px; }
