@@ -12,7 +12,10 @@
 - **SEO 优化**：Open Graph、canonical、sitemap
 - **自定义 404 页面**
 - **回到顶部按钮**、深色模式、手机响应式
-- **Giscus 评论**（已配置）、RSS 订阅
+- **Giscus 评论**（已配置）
+- **访问统计**（不蒜子：站点总访问 / 访客数 / 文章阅读量，可在 `config.json` 关闭）
+- **文章封面图**（frontmatter 里写 `cover:`，自动用于首页缩略图、文章横幅和分享图）
+- **RSS 全文输出**（`content:encoded` 全文 + 封面图）
 
 ## 快速开始
 
@@ -35,6 +38,7 @@ python build.py --serve
 title: 我的第一篇文章
 date: 2026-08-24
 tags: [教程, 随笔]
+cover: /assets/images/covers/xxx.svg   # 可选：文章封面图
 summary: 一句话摘要，会显示在首页。
 draft: false
 ---
