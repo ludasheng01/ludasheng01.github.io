@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-label="写作到发布流程图示例">
+  <rect width="800" height="450" rx="18" fill="#fff7ed"/>
+  <defs>
+    <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f59e0b"/>
+      <stop offset="1" stop-color="#ea580c"/>
+    </linearGradient>
+  </defs>
+  <circle cx="400" cy="150" r="64" fill="url(#ig)"/>
+  <circle cx="400" cy="150" r="26" fill="#fbbf24"/>
+  <text x="400" y="290" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="26" fill="#9a3412" font-weight="bold">写作 → 构建 → 部署 → 上线</text>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif" font-size="18" fill="#c2410c">
+    <rect x="90"  y="330" width="130" height="46" rx="23" fill="#ffedd5"/>
+    <text x="155" y="359" text-anchor="middle">📝 写 Markdown</text>
+    <rect x="335" y="330" width="130" height="46" rx="23" fill="#ffedd5"/>
+    <text x="400" y="359" text-anchor="middle">⚙️ 自动构建</text>
+    <rect x="580" y="330" width="130" height="46" rx="23" fill="#ffedd5"/>
+    <text x="645" y="359" text-anchor="middle">🚀 发布上线</text>
+  </g>
+  <g stroke="#fbbf24" stroke-width="6" stroke-linecap="round">
+    <line x1="222" y1="353" x2="328" y2="353"/>
+    <line x1="467" y1="353" x2="573" y2="353"/>
+  </g>
+  <path d="M240 353l10 -6v12z" fill="#fbbf24"/><path d="M486 353l10 -6v12z" fill="#fbbf24"/>
+</svg>
