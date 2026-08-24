@@ -1,6 +1,6 @@
 <section class="tool-page">
   <h1 class="page-title">日历</h1>
-  <p class="page-desc">今天是 <strong id="cal-today"></strong></p>
+  <p class="page-desc">今天是 <strong id="cal-today"></strong> · 节日数据来自中国法定节假日</p>
   <div class="calendar">
     <div class="cal-head">
       <button type="button" id="cal-prev" aria-label="上个月">← 上月</button>
@@ -11,15 +11,42 @@
       <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
     </div>
     <div class="cal-grid" id="cal-days"></div>
+    <p class="cal-legend">
+      <span class="legend-festival">■ 节假日</span>
+      <span class="legend-workday">■ 调休补班</span>
+      <span class="legend-today">■ 今天</span>
+    </p>
   </div>
 </section>
 <script>
 (function () {
   var now = new Date();
   var year = now.getFullYear(), month = now.getMonth();
+  var holidayCache = {};
   var titleEl = document.getElementById("cal-title");
   var daysEl = document.getElementById("cal-days");
   document.getElementById("cal-today").textContent = year + "-" + (month + 1) + "-" + now.getDate();
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function getHolidays(y, cb) {
+    if (holidayCache[y]) { cb(holidayCache[y]); return; }
+    var lsKey = "holiday:" + y;
+    try {
+      var cached = localStorage.getItem(lsKey);
+      if (cached) { holidayCache[y] = JSON.parse(cached); cb(holidayCache[y]); return; }
+    } catch (e) {}
+    fetch("https://timor.tech/api/holiday/year/" + y)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var map = (data && data.holiday) || {};
+        holidayCache[y] = map;
+        try { localStorage.setItem(lsKey, JSON.stringify(map)); } catch (e) {}
+        cb(map);
+      })
+      .catch(function () { cb(null); });
+  }
+
   function render() {
     var first = new Date(year, month, 1);
     var startWeekday = (first.getDay() + 6) % 7;
@@ -29,10 +56,32 @@
     for (var i = 0; i < startWeekday; i++) { html += "<span class='cal-blank'></span>"; }
     for (var d = 1; d <= daysInMonth; d++) {
       var isToday = d === now.getDate() && month === now.getMonth() && year === now.getFullYear();
-      html += "<span class='cal-day" + (isToday ? " today" : "") + "'>" + d + "</span>";
+      html += "<span class='cal-day" + (isToday ? " today" : "") + "' data-day='" + d + "'><span class='cal-num'>" + d + "</span></span>";
     }
     daysEl.innerHTML = html;
+
+    getHolidays(year, function (map) {
+      if (!map) return;
+      daysEl.querySelectorAll(".cal-day").forEach(function (el) {
+        var d = el.getAttribute("data-day");
+        var h = map[pad(month + 1) + "-" + pad(parseInt(d, 10))];
+        if (!h) return;
+        if (h.holiday) {
+          var label = document.createElement("span");
+          label.className = "cal-festival";
+          label.textContent = h.name;
+          el.appendChild(label);
+        } else {
+          el.classList.add("workday");
+          var tag = document.createElement("span");
+          tag.className = "cal-workday-tag";
+          tag.textContent = "班";
+          el.appendChild(tag);
+        }
+      });
+    });
   }
+
   document.getElementById("cal-prev").addEventListener("click", function () { month--; if (month < 0) { month = 11; year--; } render(); });
   document.getElementById("cal-next").addEventListener("click", function () { month++; if (month > 11) { month = 0; year++; } render(); });
   render();
