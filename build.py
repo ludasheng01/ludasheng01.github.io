@@ -268,8 +268,9 @@ def write_highlight_css():
     try:
         from pygments.formatters import HtmlFormatter
         light = HtmlFormatter(style="friendly").get_style_defs(".highlight")
-        dark = HtmlFormatter(style="monokai").get_style_defs(".highlight")
-        css = light + "\n@media (prefers-color-scheme: dark) {\n" + dark + "\n}\n"
+        dark_manual = HtmlFormatter(style="monokai").get_style_defs(':root[data-theme="dark"] .highlight')
+        dark_media = HtmlFormatter(style="monokai").get_style_defs(":root:not([data-theme]) .highlight")
+        css = light + "\n" + dark_manual + "\n@media (prefers-color-scheme: dark) {\n" + dark_media + "\n}\n"
         out = PUBLIC_DIR / "assets" / "css" / "highlight.css"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(css, encoding="utf-8")
@@ -580,7 +581,8 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
     if bg:
         background_style = (
             f"<style>:root{{--bg-img:url('{bg}');--bg-img-veil:rgba(255,255,255,.84)}}"
-            "@media (prefers-color-scheme:dark){:root{--bg-img-veil:rgba(8,12,24,.82)}}</style>"
+            ":root[data-theme=dark]{--bg-img-veil:rgba(8,12,24,.82)}"
+            "@media (prefers-color-scheme:dark){:root:not([data-theme]){--bg-img-veil:rgba(8,12,24,.82)}}</style>"
         )
     busuanzi_on = ANALYTICS.get("busuanzi", False)
     busuanzi_site = (
