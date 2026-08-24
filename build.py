@@ -579,8 +579,8 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
     background_style = ""
     if bg:
         background_style = (
-            f"<style>:root{{--bg-img:url('{bg}');--bg-img-veil:rgba(255,255,255,.6)}}"
-            "@media (prefers-color-scheme:dark){:root{--bg-img-veil:rgba(8,12,24,.6)}}</style>"
+            f"<style>:root{{--bg-img:url('{bg}');--bg-img-veil:rgba(255,255,255,.84)}}"
+            "@media (prefers-color-scheme:dark){:root{--bg-img-veil:rgba(8,12,24,.82)}}</style>"
         )
     busuanzi_on = ANALYTICS.get("busuanzi", False)
     busuanzi_site = (
