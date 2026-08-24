@@ -44,7 +44,12 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background: var(--bg-grad);
-  background-image: var(--bg-img, none), var(--bg-grad);
+  background-image: var(--bg-img, none),
+    linear-gradient(var(--bg-img-veil, rgba(0, 0, 0, 0)), var(--bg-img-veil, rgba(0, 0, 0, 0))),
+    var(--bg-grad);
+  background-size: cover, auto, auto;
+  background-position: center, 0 0, 0 0;
+  background-repeat: no-repeat, repeat, repeat;
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",

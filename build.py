@@ -578,7 +578,10 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
     bg = SITE.get("background", "")
     background_style = ""
     if bg:
-        background_style = f"<style>:root{{--bg-img:url('{bg}')}}</style>"
+        background_style = (
+            f"<style>:root{{--bg-img:url('{bg}');--bg-img-veil:rgba(255,255,255,.6)}}"
+            "@media (prefers-color-scheme:dark){:root{--bg-img-veil:rgba(8,12,24,.6)}}</style>"
+        )
     busuanzi_on = ANALYTICS.get("busuanzi", False)
     busuanzi_site = (
         '<span class="site-stats">本站总访问 <span id="busuanzi_value_site_pv"></span> 次 · 访客 <span id="busuanzi_value_site_uv"></span> 人</span>'
