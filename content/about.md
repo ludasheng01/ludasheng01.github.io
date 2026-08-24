@@ -12,6 +12,7 @@ title: 关于
 
 ## 联系我
 
-- 邮箱：example@example.com（待替换）
+- 邮箱：[hellods1@qq.com](mailto:hellods1@qq.com)
 
 谢谢你的阅读！
+
