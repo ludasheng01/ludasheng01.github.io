@@ -42,6 +42,13 @@
       <a href="{{BASE}}/archive/" {{NAV_ARCHIVE}}>归档</a>
       <a href="{{BASE}}/tags/" {{NAV_TAGS}}>标签</a>
       <a href="{{BASE}}/categories/" {{NAV_CATEGORIES}}>分类</a>
+      <div class="nav-dropdown">
+        <button type="button" class="nav-dropdown-toggle" {{NAV_RECORD}} aria-haspopup="true" aria-expanded="false">记录 <span class="caret">▾</span></button>
+        <div class="nav-dropdown-menu">
+          <a href="{{BASE}}/todo/">要做的清单</a>
+          <a href="{{BASE}}/calendar/">日历</a>
+        </div>
+      </div>
       <a href="{{BASE}}/about/" {{NAV_ABOUT}}>关于</a>
     </nav>
     <form class="site-search" action="{{BASE}}/search/" method="get" role="search">
@@ -192,6 +199,25 @@
     var next = cur === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
     try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+})();
+</script>
+<script>
+(function () {
+  var dd = document.querySelector(".nav-dropdown");
+  if (!dd) return;
+  var btn = dd.querySelector(".nav-dropdown-toggle");
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var open = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", open ? "false" : "true");
+    dd.classList.toggle("open", !open);
+  });
+  document.addEventListener("click", function (e) {
+    if (!dd.contains(e.target)) {
+      btn.setAttribute("aria-expanded", "false");
+      dd.classList.remove("open");
+    }
   });
 })();
 </script>

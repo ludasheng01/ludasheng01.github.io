@@ -1,0 +1,40 @@
+<section class="tool-page">
+  <h1 class="page-title">日历</h1>
+  <p class="page-desc">今天是 <strong id="cal-today"></strong></p>
+  <div class="calendar">
+    <div class="cal-head">
+      <button type="button" id="cal-prev" aria-label="上个月">← 上月</button>
+      <h2 id="cal-title"></h2>
+      <button type="button" id="cal-next" aria-label="下个月">下月 →</button>
+    </div>
+    <div class="cal-grid cal-weekdays">
+      <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    </div>
+    <div class="cal-grid" id="cal-days"></div>
+  </div>
+</section>
+<script>
+(function () {
+  var now = new Date();
+  var year = now.getFullYear(), month = now.getMonth();
+  var titleEl = document.getElementById("cal-title");
+  var daysEl = document.getElementById("cal-days");
+  document.getElementById("cal-today").textContent = year + "-" + (month + 1) + "-" + now.getDate();
+  function render() {
+    var first = new Date(year, month, 1);
+    var startWeekday = (first.getDay() + 6) % 7;
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    titleEl.textContent = year + " 年 " + (month + 1) + " 月";
+    var html = "";
+    for (var i = 0; i < startWeekday; i++) { html += "<span class='cal-blank'></span>"; }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var isToday = d === now.getDate() && month === now.getMonth() && year === now.getFullYear();
+      html += "<span class='cal-day" + (isToday ? " today" : "") + "'>" + d + "</span>";
+    }
+    daysEl.innerHTML = html;
+  }
+  document.getElementById("cal-prev").addEventListener("click", function () { month--; if (month < 0) { month = 11; year--; } render(); });
+  document.getElementById("cal-next").addEventListener("click", function () { month++; if (month > 11) { month = 0; year++; } render(); });
+  render();
+})();
+</script>

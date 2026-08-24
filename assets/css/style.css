@@ -327,6 +327,8 @@ img { max-width: 100%; height: auto; }
   .header-inner { flex-direction: column; align-items: stretch; }
   .site-nav { justify-content: center; }
   .site-search input { width: 100%; }
+  .nav-dropdown-menu { display: none; position: static; min-width: 0; box-shadow: none; padding: 4px 0 4px 10px; }
+  .nav-dropdown.open .nav-dropdown-menu { display: flex; }
 }
 
 /* ===== 搜索页 ===== */
@@ -619,3 +621,137 @@ img { max-width: 100%; height: auto; }
 .theme-toggle .icon-sun { display: none; }
 :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+
+/* ===== 记录下拉菜单 ===== */
+.nav-dropdown { position: relative; }
+.nav-dropdown-toggle {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 14.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-dropdown-toggle:hover { color: var(--text); background: var(--surface); }
+.nav-dropdown-toggle.active { color: var(--accent); background: var(--accent-soft); font-weight: 500; }
+.caret { font-size: 10px; opacity: 0.7; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 158px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity .18s, transform .18s, visibility .18s;
+  z-index: 30;
+}
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu,
+.nav-dropdown.open .nav-dropdown-menu { opacity: 1; visibility: visible; transform: none; }
+.nav-dropdown-menu a {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.nav-dropdown-menu a:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
+
+/* ===== 记录工具页 ===== */
+.todo-form { display: flex; gap: 8px; margin-bottom: 18px; }
+.todo-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+}
+.todo-form input:focus { border-color: var(--accent); }
+.todo-form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  cursor: pointer;
+}
+.todo-list { list-style: none; margin: 0; padding: 0; }
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px dashed var(--border);
+}
+.todo-item input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+.todo-item span { flex: 1; font-size: 15px; }
+.todo-item.done span { text-decoration: line-through; color: var(--muted); }
+.todo-del {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.todo-del:hover { color: var(--destructive, #dc2626); border-color: currentColor; }
+.todo-empty { color: var(--muted); font-size: 14.5px; }
+
+.calendar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 18px;
+}
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cal-head h2 { font-size: 17px; margin: 0; }
+.cal-head button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.cal-head button:hover { border-color: var(--accent); color: var(--accent); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-weekdays span { text-align: center; font-size: 13px; color: var(--muted); padding: 6px 0; }
+.cal-day, .cal-blank {
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 9px;
+  font-size: 14.5px;
+}
+.cal-day:hover { background: var(--accent-soft); color: var(--accent); }
+.cal-day.today { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+
+
+/* 移动端：下拉菜单改为点击展开（放在末尾以覆盖基础样式） */
+@media (max-width: 700px) {
+  .nav-dropdown-menu { display: none; position: static; min-width: 0; box-shadow: none; padding: 4px 0 4px 10px; }
+  .nav-dropdown.open .nav-dropdown-menu { display: flex; }
+}

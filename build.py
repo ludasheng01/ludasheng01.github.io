@@ -530,6 +530,11 @@ def build():
         about_content = render_template("about.html", CONTENT=about["content_html"], BASE=SITE["base"])
         write_page("about", about_content, about["title"], SITE["description"])
 
+    # ---------- 记录工具 ----------
+    for slug, title, desc in (("todo", "要做的清单", "记录待办事项"), ("calendar", "日历", "查看日历")):
+        tool_content = render_template(slug + ".html", BASE=SITE["base"])
+        write_page(slug, tool_content, title, desc)
+
     # ---------- 搜索 ----------
     search_index = [
         {
@@ -610,6 +615,7 @@ def wrap_layout(content, page_title, description, active, path="/", og_type="web
         NAV_TAGS='class="active"' if active == "tags" else "",
         NAV_ABOUT='class="active"' if active == "about" else "",
         NAV_CATEGORIES='class="active"' if active == "categories" else "",
+        NAV_RECORD='class="active"' if active in ("todo", "calendar") else "",
         BACKGROUND_STYLE=background_style,
         BUSUANZI_SITE=busuanzi_site,
         BUSUANZI_SCRIPT=busuanzi_script,
@@ -666,6 +672,7 @@ def write_sitemap(posts, tags, cats, base, total_pages=1):
     urls += [f"{SITE['url']}{base}/posts/{p['slug']}/" for p in posts]
     urls += [f"{SITE['url']}{base}/tags/{t}/" for t in tags]
     urls += [f"{SITE['url']}{base}/categories/{slugify(c)}/" for c in cats]
+    urls += [f"{SITE['url']}{base}/todo/", f"{SITE['url']}{base}/calendar/"]
     urls += [f"{SITE['url']}{base}/page/{n}/" for n in range(2, total_pages + 1)]
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "".join(f"<url><loc>{u}</loc></url>\n" for u in urls)

@@ -1,0 +1,53 @@
+<section class="tool-page">
+  <h1 class="page-title">要做的清单</h1>
+  <p class="page-desc">记录你最近要做的事情，保存在浏览器本地，关掉页面也不会丢。</p>
+  <form class="todo-form" id="todo-form">
+    <input type="text" id="todo-input" placeholder="添加一件事，按回车确认…" autocomplete="off" aria-label="待办事项">
+    <button type="submit">添加</button>
+  </form>
+  <ul class="todo-list" id="todo-list"></ul>
+  <p class="todo-empty" id="todo-empty">还没有待办事项，添加一条吧～</p>
+</section>
+<script>
+(function () {
+  var KEY = "todo-list";
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) {}
+  var ul = document.getElementById("todo-list");
+  var empty = document.getElementById("todo-empty");
+  var form = document.getElementById("todo-form");
+  var input = document.getElementById("todo-input");
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {} }
+  function render() {
+    ul.innerHTML = "";
+    list.forEach(function (item, i) {
+      var li = document.createElement("li");
+      li.className = "todo-item" + (item.done ? " done" : "");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = item.done;
+      cb.setAttribute("aria-label", "标记完成");
+      cb.addEventListener("change", function () { item.done = cb.checked; save(); render(); });
+      var span = document.createElement("span");
+      span.textContent = item.text;
+      var del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "删除";
+      del.className = "todo-del";
+      del.addEventListener("click", function () { list.splice(i, 1); save(); render(); });
+      li.appendChild(cb); li.appendChild(span); li.appendChild(del);
+      ul.appendChild(li);
+    });
+    empty.style.display = list.length ? "none" : "";
+  }
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var t = input.value.trim();
+    if (!t) return;
+    list.unshift({ text: t, done: false });
+    input.value = "";
+    save(); render();
+  });
+  render();
+})();
+</script>
