@@ -7,7 +7,16 @@
 <meta name="description" content="{{DESCRIPTION}}">
 <link rel="icon" href="{{BASE}}/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{{BASE}}/assets/css/style.css">
+<link rel="stylesheet" href="{{BASE}}/assets/css/highlight.css">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="{{BASE}}/rss.xml">
+<meta property="og:site_name" content="{{SITE_TITLE}}">
+<meta property="og:title" content="{{PAGE_TITLE}}">
+<meta property="og:description" content="{{DESCRIPTION}}">
+<meta property="og:type" content="{{OG_TYPE}}">
+<meta property="og:url" content="{{PAGE_URL}}">
+<meta property="og:image" content="{{OG_IMAGE}}">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="{{PAGE_URL}}">
 </head>
 <body>
 <header class="site-header">
@@ -22,6 +31,9 @@
       <a href="{{BASE}}/tags/" {{NAV_TAGS}}>标签</a>
       <a href="{{BASE}}/about/" {{NAV_ABOUT}}>关于</a>
     </nav>
+    <form class="site-search" action="{{BASE}}/search/" method="get" role="search">
+      <input type="search" name="q" placeholder="搜索文章…" aria-label="搜索文章">
+    </form>
   </div>
 </header>
 <main class="wrap main">
@@ -32,5 +44,18 @@
     <p>© {{YEAR}} {{AUTHOR}} · <a href="{{BASE}}/rss.xml">RSS 订阅</a></p>
   </div>
 </footer>
+<button type="button" class="back-to-top" aria-label="回到顶部">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<script>
+(function () {
+  var btn = document.querySelector(".back-to-top");
+  if (!btn) return;
+  function toggle() { btn.classList.toggle("visible", window.scrollY > 400); }
+  window.addEventListener("scroll", toggle, { passive: true });
+  btn.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
+  toggle();
+})();
+</script>
 </body>
 </html>

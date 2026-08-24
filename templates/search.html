@@ -1,0 +1,56 @@
+<section class="search-page">
+  <h1 class="page-title">搜索</h1>
+  <form class="search-form" action="{{BASE}}/search/" method="get" role="search">
+    <input type="search" name="q" id="search-input" placeholder="输入关键词，如：Markdown…" autocomplete="off" aria-label="搜索关键词">
+    <button type="submit">搜索</button>
+  </form>
+  <p id="search-status" class="page-desc" role="status"></p>
+  <div id="search-results" class="search-results"></div>
+</section>
+<script>
+(function () {
+  var INDEX_URL = "{{BASE}}/search.json";
+  var input = document.getElementById("search-input");
+  var status = document.getElementById("search-status");
+  var results = document.getElementById("search-results");
+  var index = null;
+  var params = new URLSearchParams(location.search);
+  var q = (params.get("q") || "").trim();
+  if (q) input.value = q;
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+  function render(q) {
+    if (!index) return;
+    q = q.trim().toLowerCase();
+    if (!q) { status.textContent = ""; results.innerHTML = ""; return; }
+    var hits = index.filter(function (item) {
+      var hay = (item.title + " " + item.tags.join(" ") + " " + item.summary).toLowerCase();
+      return q.split(/\s+/).every(function (word) { return hay.indexOf(word) !== -1; });
+    });
+    if (hits.length === 0) {
+      status.textContent = "没有找到与「" + q + "」相关的文章";
+      results.innerHTML = "";
+    } else {
+      status.textContent = "找到 " + hits.length + " 篇相关文章";
+      results.innerHTML = hits.map(function (item) {
+        return '<article class="post-item">' +
+          '<h2 class="post-item-title"><a href="' + item.url + '">' + escapeHtml(item.title) + '</a></h2>' +
+          '<div class="post-meta"><time>' + item.date + '</time> ' +
+          item.tags.map(function (t) { return '<span class="tag">#' + escapeHtml(t) + '</span>'; }).join(" ") +
+          '</div>' +
+          (item.summary ? '<p class="post-item-summary">' + escapeHtml(item.summary) + '</p>' : "") +
+          '</article>';
+      }).join("");
+    }
+  }
+  fetch(INDEX_URL).then(function (r) { return r.json(); }).then(function (data) {
+    index = data;
+    render(input.value);
+  }).catch(function () { status.textContent = "搜索索引加载失败"; });
+  input.addEventListener("input", function () { render(input.value); });
+})();
+</script>

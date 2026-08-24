@@ -65,16 +65,31 @@ CONFIG = load_config()
 SITE = CONFIG["site"]
 COMMENTS = CONFIG["comments"]
 
-MD_EXTENSIONS = ["fenced_code", "tables", "toc", "attr_list", "sane_lists", "def_list"]
+MD_EXTENSIONS = ["fenced_code", "tables", "toc", "attr_list", "sane_lists", "def_list", "codehilite"]
 
 
 def render_markdown(body):
-    md = markdown.Markdown(extensions=MD_EXTENSIONS, output_format="html5")
+    md = markdown.Markdown(
+        extensions=MD_EXTENSIONS,
+        extension_configs={"codehilite": {"guess_lang": False, "css_class": "highlight", "noclasses": False}},
+        output_format="html5",
+    )
     content_html = md.convert(body)
     toc = getattr(md, "toc", "")
     # 支持在正文里写 [TOC] 生成目录
     content_html = content_html.replace("<p>[TOC]</p>", toc)
     return content_html, toc
+
+
+def reading_stats(body):
+    """粗略统计正文阅读时长与字数。"""
+    body = re.sub(r"```.*?```", "", body, flags=re.S)
+    body = re.sub(r"[#>*_`\[\]()!\-]", "", body)
+    cjk = len(re.findall(r"[\u4e00-\u9fff]", body))
+    words = len(re.findall(r"[A-Za-z0-9]+", body))
+    total = cjk + words
+    minutes = max(1, round(total / 400))
+    return minutes, total
 
 
 def parse_frontmatter(text):
@@ -129,8 +144,11 @@ def read_post(path):
     meta, body = parse_frontmatter(text)
     content_html, toc = render_markdown(body)
     date = parse_date(meta.get("date", "")) if meta.get("date") else datetime.now()
+    minutes, words = reading_stats(body)
     return {
         "slug": slugify(path.name),
+        "reading_minutes": minutes,
+        "word_count": words,
         "title": meta.get("title", Path(path).stem),
         "date": date,
         "tags": meta.get("tags", []),
@@ -203,6 +221,20 @@ def giscus_html():
 </section>'''
 
 
+def write_highlight_css():
+    """生成代码高亮样式（亮色 + 深色两套，随系统切换）。"""
+    try:
+        from pygments.formatters import HtmlFormatter
+        light = HtmlFormatter(style="friendly").get_style_defs(".highlight")
+        dark = HtmlFormatter(style="monokai").get_style_defs(".highlight")
+        css = light + "\n@media (prefers-color-scheme: dark) {\n" + dark + "\n}\n"
+        out = PUBLIC_DIR / "assets" / "css" / "highlight.css"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(css, encoding="utf-8")
+    except ImportError:
+        pass
+
+
 def build():
     if PUBLIC_DIR.exists():
         shutil.rmtree(PUBLIC_DIR)
@@ -215,6 +247,7 @@ def build():
         favicon = PUBLIC_DIR / "assets" / "images" / "favicon.svg"
         if favicon.exists():
             shutil.copy(favicon, PUBLIC_DIR / "favicon.svg")
+    write_highlight_css()
 
     posts = load_posts(include_drafts=args.drafts)
     pages = {"about": load_page("about.md")}
@@ -266,22 +299,43 @@ def build():
             f'<a href="{url("posts/" + next_post["slug"] + "/")}">{html.escape(next_post["title"])} →</a>'
             if next_post else "<span></span>"
         )
+        # 相关文章（按标签重合推荐）
+        related = []
+        for other in posts:
+            if other["slug"] == post["slug"]:
+                continue
+            if set(other["tags"]) & set(post["tags"]):
+                related.append(other)
+        related = related[:3]
+        related_html = ""
+        if related:
+            related_html = (
+                '<section class="related-posts"><h2>相关文章</h2><ul>'
+                + "".join(
+                    f'<li><a href="{url("posts/" + p["slug"] + "/")}">{html.escape(p["title"])}</a></li>'
+                    for p in related
+                )
+                + "</ul></section>"
+            )
         content = render_template(
             "post.html",
             TITLE=html.escape(post["title"]),
             DATE=format_date(post["date"]),
             DATE_ISO=post["date"].isoformat(),
             TAGS=tags_html,
+            READING_TIME=f'<span>约 {post["reading_minutes"]} 分钟 · {post["word_count"]} 字</span>',
             CONTENT=post["content_html"],
             TOC=post["toc"],
             COMMENTS=giscus_html(),
+            RELATED=related_html,
             PREV=prev_html,
             NEXT=next_html,
         )
         out = PUBLIC_DIR / "posts" / post["slug"]
         out.mkdir(parents=True, exist_ok=True)
         (out / "index.html").write_text(
-            wrap_layout(content, html.escape(post["title"]), SITE["description"], "posts"),
+            wrap_layout(content, html.escape(post["title"]), SITE["description"], "posts",
+                        path=f"/posts/{post['slug']}/", og_type="article"),
             encoding="utf-8",
         )
 
@@ -308,7 +362,7 @@ def build():
         out = PUBLIC_DIR / "tags" / tag_slug
         out.mkdir(parents=True, exist_ok=True)
         (out / "index.html").write_text(
-            wrap_layout(content, f"标签：{tag}", SITE["description"], "tags"),
+            wrap_layout(content, f"标签：{tag}", SITE["description"], "tags", path=f"/tags/{tag_slug}/"),
             encoding="utf-8",
         )
 
@@ -334,9 +388,31 @@ def build():
         about_content = render_template("about.html", CONTENT=about["content_html"], BASE=SITE["base"])
         write_page("about", about_content, about["title"], SITE["description"])
 
+    # ---------- 搜索 ----------
+    search_index = [
+        {
+            "title": p["title"],
+            "url": f"{base}/posts/{p['slug']}/",
+            "date": p["date"].strftime("%Y-%m-%d"),
+            "tags": p["tags"],
+            "summary": (p["summary"] or strip_html(p["content_html"]))[:200],
+        }
+        for p in posts
+    ]
+    (PUBLIC_DIR / "search.json").write_text(json.dumps(search_index, ensure_ascii=False), encoding="utf-8")
+    search_content = render_template("search.html", BASE=SITE["base"])
+    write_page("search", search_content, "搜索", "站内搜索")
+
+    # ---------- 404 ----------
+    notfound = render_template("404.html", BASE=SITE["base"])
+    (PUBLIC_DIR / "404.html").write_text(
+        wrap_layout(notfound, "页面未找到", "你访问的页面不存在", "404", path="/404.html"),
+        encoding="utf-8",
+    )
+
     # ---------- 首页 & RSS & sitemap ----------
     (PUBLIC_DIR / "index.html").write_text(
-        wrap_layout(index_content, SITE["title"], SITE["description"], "home"),
+        wrap_layout(index_content, SITE["title"], SITE["description"], "home", path="/"),
         encoding="utf-8",
     )
     write_rss(posts, base)
@@ -350,12 +426,18 @@ def strip_html(text):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def wrap_layout(content, page_title, description, active):
+def wrap_layout(content, page_title, description, active, path="/", og_type="website"):
     full_title = page_title if page_title == SITE["title"] else f"{page_title} · {SITE['title']}"
+    base = SITE["base"].rstrip("/")
+    page_url = SITE["url"] + base + path
+    og_image = SITE["url"] + base + "/assets/images/avatar.svg"
     return render_template(
         "base.html",
         PAGE_TITLE=full_title,
         DESCRIPTION=html.escape(description),
+        PAGE_URL=html.escape(page_url),
+        OG_IMAGE=html.escape(og_image),
+        OG_TYPE=og_type,
         LANG=SITE["language"],
         BASE=SITE["base"],
         SITE_TITLE=html.escape(SITE["title"]),
@@ -373,7 +455,7 @@ def write_page(slug, content, title, description):
     out = PUBLIC_DIR / slug
     out.mkdir(parents=True, exist_ok=True)
     (out / "index.html").write_text(
-        wrap_layout(content, title, description, slug),
+        wrap_layout(content, title, description, slug, path=f"/{slug}/"),
         encoding="utf-8",
     )
 
