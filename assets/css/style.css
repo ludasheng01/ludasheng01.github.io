@@ -122,8 +122,10 @@ img { max-width: 100%; height: auto; }
 
 /* ===== 主体 ===== */
 .main {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: 18px;
   box-shadow: var(--card-shadow);
   padding: 36px 34px 56px;
@@ -265,8 +267,10 @@ img { max-width: 100%; height: auto; }
   font-size: 13.5px;
 }
 .site-footer .wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: 14px;
   box-shadow: var(--card-shadow);
   padding: 16px 22px;
