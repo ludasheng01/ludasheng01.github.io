@@ -553,8 +553,8 @@ img { max-width: 100%; height: auto; }
 /* ===== 返回底部按钮 ===== */
 .back-to-bottom {
   position: fixed;
-  left: 22px;
-  top: 50%;
+  right: 22px;
+  top: calc(50% + 72px);
   transform: translateY(-50%);
   width: 58px;
   padding: 10px 6px;
